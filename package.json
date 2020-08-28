@@ -1,9 +1,9 @@
 {
   "name": "memehub-bot",
   "version": "1.0.0",
-  "description": "post Memes",
+  "description": "The Core of the MemeHub Bot",
   "repository": {
-    "url": "mainy1995/MemeHub-Bot",
+    "url": "Memehub-GmbH-Co-KG/MemeHub-Bot",
     "type": "git"
   },
   "main": "index.js",
