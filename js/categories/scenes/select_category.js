@@ -33,10 +33,15 @@ module.exports.build = function (clients) {
 
     async function receive(ctx) {
         try {
-            const categories = await clients.validateCategories.request(ctx.message.text.split(' '));
+            const categoryInput = typeof ctx.message.text === 'string'
+                ? ctx.message.text
+                : '';
+
+            const categories = await clients.validateCategories.request(categoryInput.split(' '));
+
             // Check if is valid category
             if (categories.length < 1) {
-                ctx.reply("That is 🚫not🚫 a valid category. Try again 👇", buildCategoryKeyboard(ctx));
+                ctx.reply("That is not a valid category. Try again 👇", buildCategoryKeyboard(ctx));
                 return;
             }
 
