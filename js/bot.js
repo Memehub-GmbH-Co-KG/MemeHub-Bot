@@ -70,7 +70,7 @@ lc.early('stop', async () => {
 });
 
 lc.on('stop', async () => {
-    getBotTokenWorker.stop().catch(console.error);
+    getBotTokenWorker && getBotTokenWorker.stop().catch(console.error);
 });
 
 lc.late('stop', async () => {
