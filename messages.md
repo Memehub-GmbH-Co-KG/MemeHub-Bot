@@ -52,6 +52,12 @@ On-way messaging (PUB/SUB)
      data?: any // Optional. Any data that belongs to the log
    }
    ```
+  - `events:config-changed`: The config has been changed
+    ```ts
+    {
+      keys: string[] // The keys that have changed
+    }
+    ```
   - `events:contest-created`: A new contest has been created
     ```ts
     {
@@ -425,4 +431,16 @@ Request and response messaging (RPC)
         ```ts
         null | string | string[] // A single validated vategory or a list of validated categories
         ```
-  
+
+### Config
+  - `config:set`: Set config keys to new values.
+    Accepts a dictionary of keys and their new values.
+      - Worker: `MemeHub-Config`
+      - Request data:
+        ```ts
+        object // A dictionary with the config keys and their new values
+        ```
+      - Response data:
+        ```ts
+        boolean // True, if the config has been updated
+        ```
