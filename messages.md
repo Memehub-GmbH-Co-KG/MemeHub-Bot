@@ -54,9 +54,7 @@ On-way messaging (PUB/SUB)
    ```
   - `events:config-changed`: The config has been changed
     ```ts
-    {
-      keys: string[] // The keys that have changed
-    }
+    string[] // The keys that have changed
     ```
   - `events:contest-created`: A new contest has been created
     ```ts
