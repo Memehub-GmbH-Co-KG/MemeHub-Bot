@@ -14,13 +14,13 @@ let publisherVote;
 let publisherRetractVote;
 let clientMayVote;
 
-_config.subscribe('vote-types', c => { vote_types = c; });
+_config.subscribe('vote_types', c => { vote_types = c; });
 _config.subscribe('rrb', async rrb => {
     await stop();
 
-    publisherVote = new Publisher(rrb.events.vote);
-    publisherRetractVote = new Publisher(rrb.events.retractVote);
-    clientMayVote = new Client(rrb.queues.mayUserVote);
+    publisherVote = new Publisher(rrb.channels.vote.issued);
+    publisherRetractVote = new Publisher(rrb.channels.vote.retracted);
+    clientMayVote = new Client(rrb.channels.limits.mayVote);
     await publisherVote.connect();
     await publisherRetractVote.connect();
     await clientMayVote.connect();

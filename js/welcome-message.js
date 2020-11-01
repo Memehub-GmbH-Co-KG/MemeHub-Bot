@@ -4,7 +4,7 @@ const util = require('./util');
 const log = require('./log');
 
 let config = {};
-_config.subscribe('config', c => config = c);
+_config.subscribe('telegram', c => config = c);
 _bot.subscribe(bot => {
     bot.start(send_welcome_message);
     bot.help(send_help_message);

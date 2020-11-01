@@ -1,18 +1,19 @@
+const { Subscriber, Client } = require('redis-request-broker');
 const log = require('./log');
-const watchr = require('watchr');
-const fs = require('fs');
 const lc = require('./lifecycle');
 
 /** Mapping of config names to callback functions subscribed to this config */
 const subscribers = {};
 /** Mapping of config names to the current configs */
 const configs = {};
-let stalker = [];
+
+let subscriberConfigChanged;
 
 /**
  * Subscribes to a config file.
- * @param config_name {The config_name of the config to subscribe to.}  
- * @param update_callback {The callback to execute, when the config has changed. This will also be executed upon subscribing or when the config has been first read.}  
+ * @param config_name The config_name of the config to subscribe to.
+ * @param update_callback The callback to execute, when the config has changed. This will
+ * also be executed upon subscribing or when the config has been first read.
  */
 function subscribe(config_name, update_callback) {
     if (config_name in subscribers) {
@@ -21,64 +22,68 @@ function subscribe(config_name, update_callback) {
     }
 
     subscribers[config_name] = [update_callback];
-    init_config(config_name);
+    get_config(config_name);
 }
 
-lc.early('stop', () => {
-    for (s of stalker) {
-        s.close();
+// Listen for config chagnes
+lc.on('init', async () => {
+    try {
+        const channelChanged = await do_get_config('rrb:channels:config:changed');
+        subscriberConfigChanged = new Subscriber(channelChanged, onConfigChange);
+        await subscriberConfigChanged.listen();
+    }
+    catch (error) {
+        console.error(error);
     }
 });
 
-async function init_config(config_name) {
-    read_config(config_name);
+// Stop listen for changes
+lc.early('stop', async () => {
+    await subscriberConfigChanged.stop();
+});
 
-    let s = watchr.open(
-        `config/${config_name}.json`,
-        (changeType) => {
-            if (changeType === 'delete') {
-                log.error('Missing config file', `Config file "${config_name}" has been deleted`);
-                return;
-            }
-
-            if (changeType === 'create') {
-                log.warning('New config file', `Config file "${config_name}" has been created`);
-                read_config(config_name);
-                return;
-            }
-
-            if (changeType !== 'update') {
-                log.error('Unknown config file update', `Config file "${config_name}" has been changed, but the update type "${changeType}" is unhandled. Skipping change.`);
-                return;
-            }
-
-            log.notice('Updated config file', `Config file "${config_name}" has been updated`);
-            read_config(config_name);
-        },
-        (err) => {
-            if (err) {
-                log.error(`Cannot attch watchr to config "${config_name}"`, err);
-                return;
-            }
-        });
-
-    stalker.push(s);
+async function do_get_config(config_name) {
+    const client = new Client('config:get', { timeout: 10000 });
+    await client.connect();
+    const [config] = await client.request([config_name]);
+    await client.disconnect();
+    return config;
 }
 
-function read_config(config_name) {
-    fs.readFile(`config/${config_name}.json`, (err, data) => {
-        if (err) {
-            log.error(`Cannot read config file "${config_name}"`, err);
-            return;
-        }
+/**
+ * Whenever something in the config changes, call read_config for every
+ * top-level key that changed and is loaded (as defined per the 'config' object).
+ * @param {*} keys 
+ */
+async function onConfigChange(keys) {
+    // If everything changed, just refresh all current configs
+    if (!Array.isArray(keys))
+        return await onConfigChange(Object.keys(configs));
 
-        on_update(config_name, JSON.parse(data));
-    });
+    keys = keys
+        .filter(k => typeof k === 'string')
+        .map(k => k.split(':')[0])
+        .filter(k => k in configs);
+
+    log.debug('Config Changed. Filtered keys to refresh:', keys);
+
+    await Promise.all(keys.map(get_config));
+}
+
+async function get_config(config_name) {
+    try {
+        const config = await do_get_config(config_name);
+        on_update(config_name, config);
+    }
+    catch (error) {
+        await log.error(`Cannot get config "${config_name}"`, error);
+    }
 }
 
 function add_subscriber(config_name, update_callback) {
     subscribers[config_name].push(update_callback);
-    if (configs[config_name]) update_callback(configs[config_name]);
+    if (configs[config_name])
+        update_callback(configs[config_name]);
 }
 
 function on_update(config_name, new_config) {

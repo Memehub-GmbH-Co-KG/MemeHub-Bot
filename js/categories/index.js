@@ -21,34 +21,34 @@ _config.subscribe('rrb', async rrb => {
     try {
         // Init workers
         // Category management
-        clients.createCategory = new Client(rrb.queues.categoriesCreate);
-        clients.deleteCategory = new Client(rrb.queues.categoriesDelete);
-        clients.listCategories = new Client(rrb.queues.categoriesList);
-        clients.categoriesCreateMapping = new Client(rrb.queues.categoriesCreateMapping);
-        clients.categoriesDeleteMapping = new Client(rrb.queues.categoriesDeleteMapping);
-        clients.categoriesMappings = new Client(rrb.queues.categoriesMappings);
-        clients.validateCategories = new Client(rrb.queues.categoriesValidate);
-        clients.getOrSetMaximum = new Client(rrb.queues.categoriesGetOrSetMaximum);
-        clients.getOrSetColumns = new Client(rrb.queues.categoriesGetOrSetColumns);
+        clients.createCategory = new Client(rrb.channels.categories.create);
+        clients.deleteCategory = new Client(rrb.channels.categories.delete);
+        clients.listCategories = new Client(rrb.channels.categories.list);
+        clients.categoriesCreateMapping = new Client(rrb.channels.categories.createMapping);
+        clients.categoriesDeleteMapping = new Client(rrb.channels.categories.deleteMapping);
+        clients.categoriesMappings = new Client(rrb.channels.categories.mappings);
+        clients.validateCategories = new Client(rrb.channels.categories.validate);
+        clients.getOrSetMaximum = new Client(rrb.channels.categories.getOrSetMaximum);
+        clients.getOrSetColumns = new Client(rrb.channels.categories.getOrSetColumns);
 
         // Categories of memes
-        clients.getCategories = new Client(rrb.queues.categoriesGet);
-        clients.setCategories = new Client(rrb.queues.categoriesSet);
-        clients.addCategories = new Client(rrb.queues.categoriesAdd);
-        clients.removeCategories = new Client(rrb.queues.categoriesRemove);
+        clients.getCategories = new Client(rrb.channels.categories.get);
+        clients.setCategories = new Client(rrb.channels.categories.set);
+        clients.addCategories = new Client(rrb.channels.categories.add);
+        clients.removeCategories = new Client(rrb.channels.categories.remove);
 
         // Contests
-        clients.listContests = new Client(rrb.queues.contestsList);
+        clients.listContests = new Client(rrb.channels.contests.list);
 
         // Init subscribers
-        subscribers.contestStarted = new Subscriber(rrb.events.contestStarted, contestsChanged);
-        subscribers.contestStopped = new Subscriber(rrb.events.contestStopped, contestsChanged);
-        subscribers.contestCreated = new Subscriber(rrb.events.contestCreated, contestsChanged);
-        subscribers.contestDeleted = new Subscriber(rrb.events.contestDeleted, contestsChanged);
-        subscribers.categoryCreated = new Subscriber(rrb.events.categoryCreated, categoryCreatedOrDeleted);
-        subscribers.categoryDeleted = new Subscriber(rrb.events.categoryDeleted, categoryCreatedOrDeleted);
-        subscribers.categoryMaximumChanged = new Subscriber(rrb.events.categoryMaximumChanged, selectCategory.setMaximum);
-        subscribers.categoryColumnsChanged = new Subscriber(rrb.events.categoryColumnsChanged, selectCategory.setColumns);
+        subscribers.contestStarted = new Subscriber(rrb.channels.contests.started, contestsChanged);
+        subscribers.contestStopped = new Subscriber(rrb.channels.contests.stopped, contestsChanged);
+        subscribers.contestCreated = new Subscriber(rrb.channels.contests.created, contestsChanged);
+        subscribers.contestDeleted = new Subscriber(rrb.channels.contests.deleted, contestsChanged);
+        subscribers.categoryCreated = new Subscriber(rrb.channels.categories.created, categoryCreatedOrDeleted);
+        subscribers.categoryDeleted = new Subscriber(rrb.channels.categories.deleted, categoryCreatedOrDeleted);
+        subscribers.categoryMaximumChanged = new Subscriber(rrb.channels.categories.maximumChanged, selectCategory.setMaximum);
+        subscribers.categoryColumnsChanged = new Subscriber(rrb.channels.categories.columnsChanged, selectCategory.setColumns);
 
         for (const c of Object.values(clients))
             await c.connect()

@@ -1,4 +1,3 @@
-const util = require('./util');
 const log = require('./log');
 const _config = require('./config');
 const maintain = require('./meme-maintaining');
@@ -13,10 +12,10 @@ let connected;
 let collection_names;
 let config;
 
-_config.subscribe('config', c => config = c.mongodb);
+_config.subscribe('mongodb', c => config = c);
 
 lc.on('start', async () => {
-    init(config.collection_names, config.database, config.connection_string);
+    init(config.collections, config.database, config.connection);
     await connected;
 })
 
@@ -52,8 +51,8 @@ function init(coll_names, db_name, connection_string) {
             const db = client.db(db_name);
 
             var collections = await Promise.all([
-                db.createCollection(collection_names.memes),
-                db.createCollection(collection_names.users)
+                db.collection(collection_names.memes),
+                db.collection(collection_names.users)
             ]);
 
             memes = collections[0];

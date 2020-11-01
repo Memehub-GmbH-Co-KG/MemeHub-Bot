@@ -11,9 +11,9 @@ const lc = require('./lifecycle');
 let bot;
 let group_id = undefined;
 let onEdit;
-_config.subscribe('config', c => group_id = c.group_id);
+_config.subscribe('telegram', c => group_id = c.group_id);
 _config.subscribe('rrb', async rrb => {
-    onEdit = new Subscriber(rrb.events.edit, on_edit);
+    onEdit = new Subscriber(rrb.channels.meme.edited, on_edit);
     try {
         await onEdit.listen();
     }

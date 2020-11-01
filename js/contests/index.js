@@ -16,7 +16,7 @@ let group_id;
 _config.subscribe('rrb', async rrb => {
     await start(rrb);
 });
-_config.subscribe('config', c => {
+_config.subscribe('telegram', c => {
     group_id = c.group_id;
 })
 _bot.subscribe(bot => {
@@ -41,13 +41,13 @@ lc.on('stop', stop);
 
 async function start(rrb) {
     try {
-        clients.create = new Client(rrb.queues.contestsCreate);
-        clients.start = new Client(rrb.queues.contestsStart);
-        clients.stop = new Client(rrb.queues.contestsStop);
-        clients.delete = new Client(rrb.queues.contestsDelete);
-        clients.list = new Client(rrb.queues.contestsList);
-        clients.top = new Client(rrb.queues.contestsTop);
-        clients.validateCategories = new Client(rrb.queues.categoriesValidate);
+        clients.create = new Client(rrb.channels.contests.create);
+        clients.start = new Client(rrb.channels.contests.start);
+        clients.stop = new Client(rrb.channels.contests.stop);
+        clients.delete = new Client(rrb.channels.contests.delete);
+        clients.list = new Client(rrb.channels.contests.list);
+        clients.top = new Client(rrb.channels.contests.top);
+        clients.validateCategories = new Client(rrb.channels.categories.validate);
         for (const client of Object.values(clients))
             await client.connect();
 

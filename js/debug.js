@@ -10,21 +10,16 @@ const admins = require('./admins');
 
 
 let config = {};
-//let mha_users = {};
-//let mha = {};
 _config.subscribe('debug', c => config = c);
-//_config.subscribe('mha', m => mha = m);
-//_config.subscribe('users', u => mha_users = u);
 _bot.subscribe(bot => {
     bot.use(log_all_updates);
     bot.command('chatinfo', reply_with_chatinfo);
     bot.command('updateusername', trigger_update_user_name);
-    //bot.command('mha', show_voting_token);
     bot.command('meme', show_meme);
 });
 
 lc.hook(async (stage, event) => {
-    if (!config.log_lifecycle_events) return;
+    if (!config || !config.log_lifecycle_events) return;
     log.info(`Lifecycle ${stage}:${event}`);
 });
 

@@ -1,7 +1,6 @@
 const { Publisher } = require('redis-request-broker');
 const { serializeError } = require('serialize-error');
 
-
 const levels = {
     error: 'error',
     warning: 'warning',
@@ -18,7 +17,7 @@ const isReady = new Promise(resolve => setReady = resolve);
 function set_config(_config) {
     _config.subscribe('rrb', async rrb => {
 
-        const channel = rrb.queues.logging || 'log';
+        const channel = rrb.channels.logging.log || 'log';
 
         if (publisher && publisher.disconnect)
             await publisher.disconnect();

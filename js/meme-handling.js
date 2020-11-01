@@ -14,7 +14,7 @@ let limits;
 
 _config.subscribe('rrb', async rrb => {
     await stop();
-    limits = new Client(rrb.queues.mayUserPost);
+    limits = new Client(rrb.channels.limits.mayPost);
     await limits.connect();
 });
 

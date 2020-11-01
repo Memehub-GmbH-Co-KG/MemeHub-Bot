@@ -4,7 +4,7 @@ const _config = require('./config');
 
 let config = {};
 let achievements = {};
-_config.subscribe('config', c => config = c);
+_config.subscribe('telegram', c => config = c);
 _config.subscribe('achievements', c => achievements = c);
 
 let recent_vote_achievements = {};

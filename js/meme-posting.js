@@ -17,10 +17,10 @@ let last = undefined;
 let contest_data = [];
 
 _bot.subscribe(b => telegram = b.telegram);
-_config.subscribe('config', c => group_id = c.group_id);
+_config.subscribe('telegram', c => group_id = c.group_id);
 _config.subscribe('rrb', async rrb => {
     await stop();
-    eventPost = new Publisher(rrb.events.post);
+    eventPost = new Publisher(rrb.channels.meme.postes);
     await eventPost.connect();
 });
 

@@ -1,3 +1,11 @@
+const { Defaults } = require('redis-request-broker');
+Defaults.setDefaults({
+    redis: {
+        prefix: 'mh:',
+        host: 'mhredis'
+    }
+});
+
 require('./js/bot');
 require('./js/log');
 require('./js/best-of');
@@ -13,3 +21,4 @@ require('./js/statistics');
 require('./js/meme-clearing');
 require('./js/meme-voting');
 require('./js/tokens');
+require('./js/config_commands');

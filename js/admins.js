@@ -4,7 +4,7 @@ const _bot = require('./bot');
 let config = {};
 let bot
 
-_config.subscribe('config', c => config = c);
+_config.subscribe('telegram', c => config = c);
 _bot.subscribe(b => bot = b);
 
 async function getAdmins() {

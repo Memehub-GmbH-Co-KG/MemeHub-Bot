@@ -14,8 +14,8 @@ let tasks = [];
 let vote_types = [];
 
 _bot.subscribe(b => bot = b);
-_config.subscribe('vote-types', v => vote_types = v);
-_config.subscribe('best-of', best_of => {
+_config.subscribe('vote_types', v => vote_types = v);
+_config.subscribe('best_of', best_of => {
     stop_all();
     if (!best_of || !best_of.enabled) return;
     channel_id = best_of.channel_id;

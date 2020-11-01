@@ -13,8 +13,8 @@ let clientGetQuota;
 let clientIssueTokens;
 _config.subscribe('rrb', async rrb => {
     await stop();
-    clientGetQuota = new Client(rrb.queues.getUserQuota);
-    clientIssueTokens = new Client(rrb.queues.issueTokens);
+    clientGetQuota = new Client(rrb.channels.limits.getQuota);
+    clientIssueTokens = new Client(rrb.channels.token.issue);
     await clientGetQuota.connect();
     await clientIssueTokens.connect();
 });

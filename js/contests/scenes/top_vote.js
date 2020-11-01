@@ -6,7 +6,7 @@ const scenes = require('../../../data/scenes.json').contest;
 const keyboard = require('../../../data/keyboard.json');
 
 let vote_types;
-_confg.subscribe('vote-types', v => vote_types = v);
+_confg.subscribe('vote_types', v => vote_types = v);
 
 const log = require('../../log');
 

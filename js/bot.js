@@ -13,13 +13,12 @@ const fs = require('fs');
 const moment = require('moment');
 
 const subscribers = [];
-let getBotTokenWorker = undefined;
 let bot;
 let bot_name;
 let has_bot = false;
 let config;
-let rrbConfig;
-_config.subscribe('config', async c => {
+
+_config.subscribe('telegram', async c => {
     if (has_bot) {
         has_bot = false;
         log.warning(`Stopping bot ${bot_name}`, 'Config has changed');
@@ -27,13 +26,6 @@ _config.subscribe('config', async c => {
     }
     config = c;
 });
-
-_config.subscribe('rrb', async rrb => {
-    Defaults.setDefaults({
-        redis: rrb.redis
-    });
-    rrbConfig = rrb;
-})
 
 lc.early('init', async () => {
     bot_name = dockerNames.getRandomName();
@@ -46,8 +38,6 @@ lc.after('init', async () => {
 
 lc.early('start', async () => {
     bot = new Telegraf(config.bot_token);
-    getBotTokenWorker = new Worker(rrbConfig.queues.getBotToken, async _ => config.bot_token);
-    getBotTokenWorker.listen().catch(error => log.warning('Failed to start get bot token worker', error));
     bot._stage = new Stage();
     log.set_config(_config);
     bot.use(Session());
@@ -67,10 +57,6 @@ lc.early('stop', async () => {
     if (!has_bot) return;
     await log.notice(`Stopping bot ${bot_name}`, 'Shutdown event received');
     await bot.stop(() => { });
-});
-
-lc.on('stop', async () => {
-    getBotTokenWorker && getBotTokenWorker.stop().catch(console.error);
 });
 
 lc.late('stop', async () => {
