@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node index.js",
     "debug": "node --nolazy --inspect-brk=5858 index.js",
-    "build": "docker build -t memehub-bot ."
+    "build": "docker build -t leifb/memehub-bot ."
   },
   "engines": {
     "node": ">=8.5.0"
