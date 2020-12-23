@@ -2,7 +2,7 @@ const Telegraf = require('telegraf');
 const config = require('./config/config.json');
 const mha_config = require('./config/mha.json');
 const MongoClient = require('mongodb').MongoClient;
-const uuidv4 = require('uuid/v4');
+const uuidv4 = require('uuid').v4;
 const fs = require('fs');
 const https = require('https');
 const CsvReadableStream = require('csv-reader');
@@ -87,9 +87,7 @@ async function export_users() {
 
     console.log('Writing to file...');
     const json = JSON.stringify(final_object, null, '  ');
-    for (const file of mha_config.users.paths) {
-        await fs.promises.writeFile(file, json);
-    }
+    await fs.promises.writeFile("users.json", json);
     console.log('Done!');
 }
 
