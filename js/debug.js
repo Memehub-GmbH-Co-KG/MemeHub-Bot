@@ -7,6 +7,7 @@ const posting = require('./meme-posting');
 const lc = require('./lifecycle');
 const util = require('./util');
 const admins = require('./admins');
+const fs = require('fs').promises;
 
 let mha_users = undefined;
 
@@ -57,7 +58,7 @@ async function show_voting_token(ctx) {
     if (!config.command_voting_token) return;
     if (ctx.chat.type !== "private") return;
 
-    const mha_users = get_mha_users();
+    const mha_users = await get_mha_users();
     const user = ctx.update.message.from.id;
     const tokens = Object.keys(mha_users).filter(k => mha_users[k].id == user);
     if (tokens.length < 1) {
@@ -78,7 +79,7 @@ async function broadcast_voting_token(ctx) {
         ctx.reply("You are not allowed to use this command.");
         return;
     }
-    const users = get_mha_users();
+    const users = await get_mha_users();
     for (token in users) {
         try {
             const id = users[token].id;
@@ -91,9 +92,9 @@ async function broadcast_voting_token(ctx) {
     }
 }
 
-function get_mha_users() {
+async function get_mha_users() {
     if (!mha_users)
-        mha_users = require('./users.json');
+        mha_users = JSON.parse(await fs.readFile('/users.json'));
 
     return mha_users;
 }
