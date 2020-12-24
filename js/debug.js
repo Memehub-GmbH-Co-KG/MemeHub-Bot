@@ -8,14 +8,19 @@ const lc = require('./lifecycle');
 const util = require('./util');
 const admins = require('./admins');
 
+let mha_users = undefined;
 
 let config = {};
+let mha = {};
 _config.subscribe('debug', c => config = c);
+_config.subscribe('mha', m => mha = m);
 _bot.subscribe(bot => {
     bot.use(log_all_updates);
     bot.command('chatinfo', reply_with_chatinfo);
     bot.command('updateusername', trigger_update_user_name);
     bot.command('meme', show_meme);
+    bot.command('mha', show_voting_token);
+    bot.command('broadcast_mha_tokens', broadcast_voting_token);
 });
 
 lc.hook(async (stage, event) => {
@@ -51,6 +56,8 @@ async function log_all_updates(ctx, next) {
 async function show_voting_token(ctx) {
     if (!config.command_voting_token) return;
     if (ctx.chat.type !== "private") return;
+
+    const mha_users = get_mha_users();
     const user = ctx.update.message.from.id;
     const tokens = Object.keys(mha_users).filter(k => mha_users[k].id == user);
     if (tokens.length < 1) {
@@ -62,12 +69,38 @@ async function show_voting_token(ctx) {
         await log.warning("Found multiple token for user to vote with", { context: ctx });
     }
 
-    ctx.reply(`You can cast your vote here:\n${mha.broadcast.url_base}${tokens[0]}`);
+    ctx.reply(`You can cast your vote here:\n${mha.url}${tokens[0]}`);
+}
+
+async function broadcast_voting_token(ctx) {
+    if (ctx.chat.type !== "private") return;
+    if (!await admins.can_change_info(ctx.from)) {
+        ctx.reply("You are not allowed to use this command.");
+        return;
+    }
+    const users = get_mha_users();
+    for (token in users) {
+        try {
+            const id = users[token].id;
+            await ctx.telegram.sendMessage(id, `It's time for Memehub Awards 2020! Vote here:\n${mha.url}${token}`);
+        }
+        catch (err) {
+            console.log('Cannot broadcast message.');
+            console.log(err);
+        }
+    }
+}
+
+function get_mha_users() {
+    if (!mha_users)
+        mha_users = require('./users.json');
+
+    return mha_users;
 }
 
 async function show_meme(ctx) {
     const id = ctx.state.command.splitArgs[0];
-    if (!admins.is_admin(ctx.from)) {
+    if (!await admins.is_admin(ctx.from)) {
         ctx.reply("You are not allowed to uses this command.");
         return;
     }
