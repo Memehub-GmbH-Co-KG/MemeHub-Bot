@@ -151,6 +151,7 @@ async function mentions() {
     await mentions.new_and_most_likes(memes);
     await mentions.new_and_best_avg(memes);
     await mentions.most_memes_in_a_day(memes);
+    await mentions.self_like(memes);
     await mentions.best_meme(memes);
 }
 

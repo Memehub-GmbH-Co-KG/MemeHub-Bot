@@ -1,7 +1,7 @@
 const moment = require('moment');
 const util = require('./util');
 
-const limit = 5;
+const limit = 10;
 const start = moment('2019-12-16T00:00:00.000Z').toDate();
 const end = moment('2020-12-16T00:00:00.000Z').toDate();
 
@@ -59,6 +59,51 @@ module.exports.most_voting = async function (memes) {
         }
     ]);
     await showResults("Most votes cast", result, m => m.count);
+}
+
+module.exports.self_like = async function (memes) {
+    const result = await memes.aggregate([
+        {
+            $match: {
+                post_date: {
+                    $gt: start,
+                    $lt: end
+                },
+                $expr: {
+                    $in: ["$poster_id",  { $ifNull: ["$votes.like", []] } ]
+                }
+            }
+        }, {
+            $group: {
+                _id: "$poster_id",
+                count: {
+                    $sum: 1
+                }
+            }
+        }, {
+            $sort: {
+                count: -1
+            }
+        }, {
+            $limit: limit
+        }, {
+            $lookup: {
+                from: 'users',
+                localField: '_id',
+                foreignField: '_id',
+                as: 'user'
+            }
+        }, {
+            $replaceRoot: {
+                newRoot: {
+                    _id: "$_id",
+                    user: { $arrayElemAt: ["$user", 0] },
+                    count: "$count"
+                }
+            }
+        }
+    ]);
+    await showResults("Most self likes", result, m => m.count);
 }
 
 module.exports.best_average = async function (memes) {
