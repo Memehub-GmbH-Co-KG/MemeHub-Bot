@@ -51,7 +51,7 @@ async function config_get(ctx) {
         const response = await get.request(withArgs ? args : false);
         const messages = withArgs
             ? args.map((a, i) => formatValue(a, response[i]))
-            : Object.entries(response).map(([k, v]) => formatValue(k, v));
+            : [Object.keys(response).reduce((res, key) => `${res}\n \\- ${formatKey(key)}`, 'Available keys:')];
 
         for (const message of messages) {
             await ctx.reply(message, { parse_mode: 'MarkdownV2' });
@@ -79,8 +79,12 @@ async function config_set(ctx) {
 }
 
 function formatValue(key, value) {
-    return `*${key.replaceAll('_', '\\_')}*\n\`\`\`json\n${JSON.stringify(value, undefined, 2).replaceAll('*', '\\*')}\n\`\`\``
+    return `${formatKey(key)}\n\`\`\`json\n${JSON.stringify(value, undefined, 2).replaceAll('*', '\\*')}\n\`\`\``
         .replace(/\./g, '\\.');
+}
+
+function formatKey(key) {
+    return `*${key.replaceAll('_', '\\_')}*`
 }
 
 async function hasPermissions(user) {
