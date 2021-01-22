@@ -1,5 +1,5 @@
 const Scene = require('telegraf/scenes/base');
-const Keyboard = require('telegraf-keyboard');
+const { Keyboard } = require('telegram-keyboard');
 const scenes = require('../../../data/scenes.json').categories;
 const _keyboard = require('../../../data/keyboard.json');
 const log = require('../../log');
@@ -11,9 +11,8 @@ module.exports.build = function build(clients) {
     scene.enter(async ctx => {
         try {
             const maximum = await clients.getOrSetMaximum.request();
-            const keyboard = new Keyboard();
-            keyboard.add(_keyboard.BACK);
-            await ctx.reply(`The current maximum of categories a user may add is ${maximum}. Enter a new maximum to change it.`, keyboard.draw());
+            const keyboard = Keyboard.reply([_keyboard.BACK]);
+            await ctx.reply(`The current maximum of categories a user may add is ${maximum}. Enter a new maximum to change it.`, keyboard);
         }
         catch (error) {
             await log.warn('Failed to init change maximum', error);

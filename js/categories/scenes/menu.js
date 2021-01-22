@@ -1,5 +1,5 @@
 const Scene = require('telegraf/scenes/base');
-const Keyboard = require('telegraf-keyboard');
+const { Keyboard } = require('telegram-keyboard');
 const scenes = require('../../../data/scenes.json').categories;
 const keyboard = require('../../../data/keyboard.json');
 
@@ -10,11 +10,11 @@ const keyboard = require('../../../data/keyboard.json');
  */
 module.exports.build = function (_) {
 
-    const keyboarStart = new Keyboard()
-        .add(keyboard.ADD, keyboard.LIST, keyboard.REMOVE)
-        .add(keyboard.CREATE_MAPPING, keyboard.LIST_MAPPINGS, keyboard.DELETE_MAPPING)
-        .add(keyboard.SET_MAXIMUM, keyboard.SET_COLUMNS, keyboard.DONE)
-        .draw();
+    const keyboarStart = Keyboard.reply([
+        [keyboard.ADD, keyboard.LIST, keyboard.REMOVE],
+        [keyboard.CREATE_MAPPING, keyboard.LIST_MAPPINGS, keyboard.DELETE_MAPPING],
+        [keyboard.SET_MAXIMUM, keyboard.SET_COLUMNS, keyboard.DONE]
+    ]);
 
     const scene = new Scene(scenes.MENU);
     scene.enter(async ctx => {

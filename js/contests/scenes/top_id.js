@@ -1,5 +1,5 @@
 const Scene = require('telegraf/scenes/base');
-const Keyboard = require('telegraf-keyboard');
+const { Keyboard } = require('telegram-keyboard');
 const { serializeError } = require('serialize-error');
 
 const log = require('../../log');
@@ -21,12 +21,11 @@ module.exports.build = function (clients) {
             if (!contests || !contests.length)
                 return await ctx.reply("You don't have any contests right now!");
 
-            const keyboardContests = new Keyboard();
-            for (contest of contests)
-                keyboardContests.add(contest.id);
-
-            keyboardContests.add(keyboard.CANCEL);
-            ctx.reply('For which contest?', keyboardContests.draw());
+            const keyboardContests = Keyboard.reply([
+                ...contests.map(c => c.id),
+                keyboard.CANCEL
+            ]);
+            ctx.reply('For which contest?', keyboardContests);
         }
         catch (error) {
             log.warn('Contest scene "top_id" failed.', { error: serializeError(error), session: ctx.session });

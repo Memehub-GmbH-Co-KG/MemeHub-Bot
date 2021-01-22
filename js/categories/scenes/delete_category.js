@@ -1,5 +1,5 @@
 const Scene = require('telegraf/scenes/base');
-const Keyboard = require('telegraf-keyboard');
+const { Keyboard } = require('telegram-keyboard');
 const scenes = require('../../../data/scenes.json').categories;
 const log = require('../../log');
 const _keyboard = require('../../../data/keyboard.json');
@@ -10,13 +10,12 @@ module.exports.build = function build(clients) {
 
     scene.enter(async ctx => {
 
-        const keyboard = new Keyboard();
         const categories = await clients.listCategories.request();
-        for (const category of categories)
-            keyboard.add(category);
-        keyboard.add(_keyboard.CANCEL);
-
-        await ctx.reply("Which category do you want do remove?", keyboard.draw());
+        const keyboard = Keyboard.reply([
+            ...categories,
+            _keyboard.CANCEL
+        ]);
+        await ctx.reply("Which category do you want do remove?", keyboard);
 
     });
     scene.hears(_keyboard.CANCEL, ctx => ctx.scene.enter(scenes.MENU));

@@ -1,5 +1,5 @@
 const Scene = require('telegraf/scenes/base');
-const Keyboard = require('telegraf-keyboard');
+const { Keyboard } = require('telegram-keyboard');
 const posting = require('../../meme-posting');
 const scenes = require('../../../data/scenes.json').categories;
 const log = require('../../log');
@@ -123,7 +123,7 @@ module.exports.build = function (clients) {
     }
 
     function buildCategoryKeyboard(ctx) {
-        const keyboard = new Keyboard();
+        const keyboard = [];
         try {
             const options = categories.map(c => ctx.session.categories.selected.includes(c) ? `[ #${c} ]` : `#${c}`);
             const contests = contestsRunning.map(c => ctx.session.categories.selected.includes(c.tag) ? `[ ${c.emoji} #${c.tag} ]` : `${c.emoji} #${c.tag}`);
@@ -135,13 +135,13 @@ module.exports.build = function (clients) {
                     !contestsRunning.some(contest => contest.tag === c)
                 ).map(c => `[ #${c} ]`));
             for (let i = 0; i < options.length; i += columns) {
-                keyboard.add(options.slice(i, i + columns));
+                keyboard.push(options.slice(i, i + columns));
             }
         }
         catch (error) {
             log.error('Cannot build category keyboard', error);
         }
-        return keyboard.draw();
+        return Keyboard.reply(keyboard);
     }
 
 

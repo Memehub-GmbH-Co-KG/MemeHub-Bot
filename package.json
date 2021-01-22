@@ -29,7 +29,7 @@
     "serialize-error": "^7.0.1",
     "telegraf": "^3.38.0",
     "telegraf-command-parts": "^1.0.3",
-    "telegraf-keyboard": "^1.1.2",
+    "telegram-keyboard": "^2.2.2",
     "uuid": "^8.3.0",
     "watchr": "^6.8.0"
   },

@@ -1,14 +1,12 @@
 const Scene = require('telegraf/scenes/base');
-const Keyboard = require('telegraf-keyboard');
+const { Keyboard } = require('telegram-keyboard');
 const { serializeError } = require('serialize-error');
 const scenes = require('../../../data/scenes.json').contest;
 const keyboard = require('../../../data/keyboard.json');
 const log = require('../../log');
 
 /**
- * Scene to delete a contest
- * @param {*} scenes 
- * @param {*} keyboard 
+ * Scene to delete a contest 
  * @param {*} clients 
  */
 module.exports.build = function (clients) {
@@ -22,12 +20,11 @@ module.exports.build = function (clients) {
                 return ctx.scene.enter(scenes.MENU);
             }
 
-            const keyboardContests = new Keyboard();
-            for (contest of contests) {
-                keyboardContests.add(contest.id);
-            }
-            keyboardContests.add(keyboard.CANCEL);
-            ctx.reply('Okay! Which contest do you want to delete?', keyboardContests.draw());
+            const keyboardContests = Keyboard.reply([
+                ...contests.map(c => c.id),
+                keyboard.CANCEL
+            ]);
+            ctx.reply('Okay! Which contest do you want to delete?', keyboardContests);
         }
         catch (error) {
             await log.error('Failed to init delete contest.', { error: serializeError(error), session: ctx.session });
