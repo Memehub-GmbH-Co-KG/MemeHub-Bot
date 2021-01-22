@@ -20,7 +20,7 @@ _bot.subscribe(b => telegram = b.telegram);
 _config.subscribe('telegram', c => group_id = c.group_id);
 _config.subscribe('rrb', async rrb => {
     await stop();
-    eventPost = new Publisher(rrb.channels.meme.postes);
+    eventPost = new Publisher(rrb.channels.meme.posted);
     await eventPost.connect();
 });
 
