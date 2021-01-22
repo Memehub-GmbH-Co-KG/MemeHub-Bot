@@ -16,10 +16,14 @@ _bot.subscribe(bot => {
  * @param {The telegraph message context} ctx 
  */
 async function clear_repost(ctx) {
-    await remove_post(ctx, 'repost', true);
+    await do_remove_post(ctx, 'repost', true);
 }
 
-async function remove_post(ctx, reason = undefined, repost = false) {
+async function remove_post(ctx) {
+    await do_remove_post(ctx);
+}
+
+async function do_remove_post(ctx, reason = undefined, repost = false) {
     try {
         // Get the message from the reply or use the last postet meme
         let message_id = ctx.update.message.reply_to_message && ctx.update.message.reply_to_message.message_id || last;
