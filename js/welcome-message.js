@@ -15,7 +15,7 @@ async function send_public_welcome_message(ctx) {
     try {
         if (ctx.message.chat.id !== config.group_id)
             return;
-        ctx.reply(
+        await ctx.reply(
             config.public_welcome_message.replace("%USER%", util.name_from_user(ctx.message.new_chat_member)),
             {
                 reply_markup: {
