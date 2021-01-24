@@ -109,21 +109,20 @@ async function handle_vote_request(ctx) {
         setTimeout(() => achievements.check_vote_achievements(ctx, group_message_id, vote_type), 200);
 
         // Update vote count
-        const new_count = await db.votes_count_by_group_message_id(group_message_id);
+        const meme = await db.meme_get_by_group_message_id(group_message_id);
+        const new_count = Object.keys(meme.votes)
+            .reduce((count, key) => ({ ...count, [key]: meme.votes[key].length }), {});
         ctx.editMessageReplyMarkup({ inline_keyboard: create_keyboard(new_count) })
             .catch(err => log.error('Cannot update vote count', err));
 
         // Send vote event to rrb
-        const poster_id = await db.poster_id_get_by_group_message_id(group_message_id);
-        const self_vote = await db.votes_includes_self_vote(group_message_id, vote_type, poster_id);
-
+        const self_vote = meme.votes[vote_type].includes(meme.poster_id);
         const event = {
             vote_type,
             new_count: new_count[vote_type],
-            meme_id,
             user_id,
-            poster_id,
-            self_vote
+            self_vote,
+            meme
         };
 
         if (voteResult === 1)

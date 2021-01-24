@@ -11,10 +11,14 @@ On-way messaging (PUB/SUB)
     {
       vote_type: string // The type of the vote, as deined in vote-types.json
       new_count: number // The new amount of votes of this type on the meme
-      meme_id: string // The if of the meme
       user_id: string // The id of the user that issued the vote
-      poster_id: string // The id of the user that posted the meme
       self_vote: boolean // Weather the poster voted his own meme (after the change)
+      meme: {
+        id: string // The id of the meme
+        poster_id: string // The id of the user that posted the meme
+        private_message_id: string // The id of the message in the chat with the poster
+        group_message_id: string // The id of the message in the group
+      }
     }
     ```
   - `events:retract-vote`: A user retracted a vote
@@ -22,10 +26,14 @@ On-way messaging (PUB/SUB)
     {
       vote_type: string // The type of the vote, as deined in vote-types.json
       new_count: number // The new amount of votes of this type on the meme
-      meme_id: string // The if of the meme
-      user_id: string // The id of the user that issued the vote
-      poster_id: string // The id of the user that posted the meme
       self_vote: boolean // Weather the poster voted his own meme (after the change)
+      user_id: string // The id of the user that issued the vote
+      meme: {
+        id: string // The id of the meme
+        poster_id: string // The id of the user that posted the meme
+        private_message_id: string // The id of the message in the chat with the poster
+        group_message_id: string // The id of the message in the group
+      }
     }
     ```
   - `events:post`: A user posted a meme

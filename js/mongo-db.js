@@ -117,6 +117,14 @@ async function save_meme(user_id, file_id, file_unique_id, file_type, message_id
     }
 }
 
+module.exports.meme_get_by_group_message_id = async function (group_message_id) {
+    const meme = await memes.findOne({ group_message_id });
+    if (!meme || !meme._id)
+        throw { error: "Cannot find meme by group message id", group_message_id };
+    meme.id = meme._id;
+    return meme;
+}
+
 module.exports.meme_id_get_by_group_message_id = async function (group_message_id) {
     const meme = await memes.findOne({ group_message_id }, { _id: 1 });
     if (!meme || !meme._id)
