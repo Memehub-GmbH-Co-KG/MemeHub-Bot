@@ -1,6 +1,6 @@
 {
   "name": "memehub-bot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The Core of the MemeHub Bot",
   "repository": {
     "url": "Memehub-GmbH-Co-KG/MemeHub-Bot",
@@ -19,19 +19,19 @@
   "license": "MIT",
   "dependencies": {
     "cron": "^1.8.2",
-    "csv-reader": "^1.0.7",
+    "csv-reader": "^1.0.8",
     "csv-writer": "^1.6.0",
     "docker-names": "^1.1.1",
-    "handy-redis": "^1.8.3",
-    "moment": "^2.29.0",
+    "handy-redis": "^2.3.1",
+    "moment": "^2.29.1",
     "mongodb": "^3.6.2",
     "redis-request-broker": "1.12.0",
     "serialize-error": "^7.0.1",
     "telegraf": "^3.38.0",
     "telegraf-command-parts": "^1.0.3",
     "telegram-keyboard": "^2.2.2",
-    "uuid": "^8.3.0",
-    "watchr": "^6.8.0"
+    "uuid": "^8.3.2",
+    "watchr": "^6.11.0"
   },
   "devDependencies": {}
 }
