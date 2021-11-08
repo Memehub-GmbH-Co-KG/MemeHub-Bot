@@ -11,7 +11,9 @@ const categories = require('./categories');
 const posting = require('./meme-posting');
 
 let limits;
+let config = {};
 
+_config.subscribe('telegram', c => config = c);
 _config.subscribe('rrb', async rrb => {
     await stop();
     limits = new Client(rrb.channels.limits.mayPost);
@@ -51,6 +53,7 @@ async function handle_meme_request(ctx) {
         log.info(`Meme request from user "${username}"`, options);
 
         if (!util.is_private_chat(ctx)) {
+            if (ctx.message.chat.id !== config.group_id) return; // Don't do anything in other groups
             if (util.is_reaction(ctx)) return; // Don't do anything if the message is a reaction (reply) to some other message
             await ctx.deleteMessage(ctx.message.message_id);
             await ctx.telegram.sendMessage(options.user.id, 'Please only send memes here in the private chat!');
