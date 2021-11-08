@@ -52,24 +52,24 @@ async function handle_meme_request(ctx) {
 
         if (!util.is_private_chat(ctx)) {
             if (util.is_reaction(ctx)) return; // Don't do anything if the message is a reaction (reply) to some other message
-            ctx.deleteMessage(ctx.message.message_id);
-            ctx.telegram.sendMessage(options.user.id, 'Please only send memes here in the private chat!');
+            await ctx.deleteMessage(ctx.message.message_id);
+            await ctx.telegram.sendMessage(options.user.id, 'Please only send memes here in the private chat!');
             log.info("Aborting meme request due to wrong chat");
             return;
         }
 
         if (!options.user.username) {
-            ctx.reply('Posting without a username is not allowed! Please choose a username in the settings.');
+            await ctx.reply('Posting without a username is not allowed! Please choose a username in the settings.');
             log.info("Aborting meme request due to missung username");
             return;
         }
         if (options.user.is_bot) {
-            ctx.reply('Only humans may send memes, sorry!')
+            await ctx.reply('Only humans may send memes, sorry!')
             log.info("Aborting meme request because user is a bot");
             return;
         }
         if (options.file_id === null) {
-            ctx.reply('It looks like I am not able to send this kind of meme, sorry!')
+            await ctx.reply('It looks like I am not able to send this kind of meme, sorry!')
             log.warning("Aborting meme request due to missing file id", ctx.message);
             return
         }
@@ -78,7 +78,7 @@ async function handle_meme_request(ctx) {
         try {
             const mayPost = await limits.request({ user_id: options.user.id });
             if (!mayPost) {
-                ctx.reply('Sorry, you are not allowed to post any more today. Come back tomorrow!');
+                await ctx.reply('Sorry, you are not allowed to post any more today. Come back tomorrow!');
                 log.info('Aborting meme request because of the post limit.', { options });
                 return;
             }

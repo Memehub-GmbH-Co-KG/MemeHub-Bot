@@ -112,21 +112,27 @@ async function stop() {
 }
 
 async function command_categories(ctx) {
-    // Check group
-    if (!util.is_private_chat(ctx)) {
-        ctx.deleteMessage(ctx.message.id).catch(e => log.error('Cannot delete command message', e));
-        ctx.telegram.sendMessage(ctx.message.from.id, 'The /categories command can only be used here')
-            .catch(e => log.error('Cannot send message to user', e));
-        return;
-    }
+    try {
 
-    // Check admin
-    if (!await admins.can_change_info(ctx.message.from)) {
-        log.info('User tried to issue categories command without permission.', { user: ctx.message.from, command: ctx.state.command });
-        return;
-    }
+        // Check group
+        if (!util.is_private_chat(ctx)) {
+            await ctx.deleteMessage(ctx.message.id).catch(e => log.error('Cannot delete command message', e));
+            await ctx.telegram.sendMessage(ctx.message.from.id, 'The /categories command can only be used here')
+                .catch(e => log.error('Cannot send message to user', e));
+            return;
+        }
 
-    ctx.scene.enter(scenes.MENU);
+        // Check admin
+        if (!await admins.can_change_info(ctx.message.from)) {
+            log.info('User tried to issue categories command without permission.', { user: ctx.message.from, command: ctx.state.command });
+            return;
+        }
+
+        ctx.scene.enter(scenes.MENU);
+    }
+    catch (error) {
+        log.warning("Failed to handle /catergories command.", error);
+    }
 }
 
 /**
@@ -242,7 +248,7 @@ async function check_command(ctx) {
     const is_private = util.is_private_chat(ctx);
     // delete request, if is in group chat
     if (!is_private)
-        await ctx.deleteMessage(ctx.update.message.message_id);
+        await ctx.deleteMessage(ctx.update.message.message_id).catch(_ => { });
 
     // Check for reply
     if (!util.is_reaction(ctx)) {

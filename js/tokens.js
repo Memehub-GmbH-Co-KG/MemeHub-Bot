@@ -37,17 +37,17 @@ async function show_quota(ctx) {
     const user_id = ctx.message.from.id;
 
     if (!util.is_private_chat(ctx)) {
-        ctx.deleteMessage(ctx.message.id);
+        await ctx.deleteMessage(ctx.message.id);
         return;
     }
 
     try {
         const quota = await clientGetQuota.request({ user_id });
-        ctx.reply(`Your Meme Tokens: ${quota.tokens}\nRemaining free posts: ${quota.freePosts}`);
+        await ctx.reply(`Your Meme Tokens: ${quota.tokens}\nRemaining free posts: ${quota.freePosts}`);
     }
     catch (error) {
         log.warning('Failed to handle quota request', { error: serializeError(error), user_id });
-        ctx.reply("Sorry, I can't help you right now.");
+        await ctx.reply("Sorry, I can't help you right now.");
     }
 }
 
@@ -58,7 +58,7 @@ async function issue_tokens(ctx) {
 
         // Delete command in group
         if (!is_private)
-            ctx.deleteMessage(ctx.message.id);
+            await ctx.deleteMessage(ctx.message.id);
 
         // Check whether the user is allowed to issue tokens
         if (!await admins.can_change_info(ctx.message.from)) {

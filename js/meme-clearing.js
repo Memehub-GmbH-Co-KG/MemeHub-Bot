@@ -61,6 +61,6 @@ async function do_remove_post(ctx, reason = undefined, repost = false) {
         log.warning("Failed to remove post. The bot might need to have the 'can_delete_messages' privilege.", serializeError(error));
     }
     finally {
-        ctx.deleteMessage(ctx.update.message.message_id);
+        ctx.deleteMessage(ctx.update.message.message_id).catch();
     }
 }
