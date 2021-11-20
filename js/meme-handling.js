@@ -12,8 +12,13 @@ const posting = require('./meme-posting');
 
 let limits;
 let config = {};
+let bot;
 
-_config.subscribe('telegram', c => config = c);
+_config.subscribe('telegram', c => {
+    config = c;
+    // Get members in group
+
+});
 _config.subscribe('rrb', async rrb => {
     await stop();
     limits = new Client(rrb.channels.limits.mayPost);
@@ -25,6 +30,11 @@ _bot.subscribe(bot => {
     bot.on('animation', handle_meme_request);
     bot.on('video', handle_meme_request);
 });
+
+function updateMembers() {
+
+    return bot.telegram.getChatAdministrators(config.group_id);
+}
 
 lc.on('stop', stop);
 async function stop() {
@@ -49,7 +59,23 @@ async function handle_meme_request(ctx) {
             categories: await categories.validate_categories(ctx.message.caption)
         };
 
+
         const username = util.name_from_user(options.user);
+
+        // Check whether the user is in the group
+        //TODO make this a hook and run for all messages / add proper banning
+        try {
+            const member = await bot.telegram.getChatMember(config.group_id, options.user.id);
+            if (!member) {
+                log.info(`User who is not in the group tried to post a meme: '${username}'`);
+                return;
+            }
+        }
+        catch (error) {
+            log.warn(`User who is not in the group tried to post a meme (error during check): '${username}'`);
+            return;
+        }
+
         log.info(`Meme request from user "${username}"`, options);
 
         if (!util.is_private_chat(ctx)) {
