@@ -25,7 +25,8 @@ _config.subscribe('rrb', async rrb => {
     await limits.connect();
 });
 
-_bot.subscribe(bot => {
+_bot.subscribe(_bot => {
+    bot = _bot;
     bot.on('photo', handle_meme_request);
     bot.on('animation', handle_meme_request);
     bot.on('video', handle_meme_request);
@@ -73,6 +74,7 @@ async function handle_meme_request(ctx) {
         }
         catch (error) {
             log.warn(`User who is not in the group tried to post a meme (error during check): '${username}'`);
+            log.error(error);
             return;
         }
 
