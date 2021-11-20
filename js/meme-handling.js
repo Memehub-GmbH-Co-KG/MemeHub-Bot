@@ -59,18 +59,19 @@ async function handle_meme_request(ctx) {
         const username = util.name_from_user(options.user);
 
         // Check whether the user is in the group
-        //TODO make this a hook and run for all messages / add proper banning
         try {
             const member = await bot.telegram.getChatMember(config.group_id, options.user.id);
             if (!member) {
-                log.info(`User who is not in the group tried to post a meme: '${username}'`);
+                log.info(`Unknown user tried to post a meme: '${username}'`);
                 return;
             }
-            log.info(`Group memebership check OK for user '${username}'`, member);
+            if (!["creator", "member", "administrator"].includes(member.status)) {
+                log.info(`Restricted user tried to pos a meme: '${username}'`, memeber.status);
+                return;
+            }
         }
         catch (error) {
-            log.warn(`User who is not in the group tried to post a meme (error during check): '${username}'`);
-            log.error(error);
+            log.error(`Error during membership check: '${username}'`, error);
             return;
         }
 
