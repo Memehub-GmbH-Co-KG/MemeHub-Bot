@@ -32,11 +32,6 @@ _bot.subscribe(_bot => {
     bot.on('video', handle_meme_request);
 });
 
-function updateMembers() {
-
-    return bot.telegram.getChatAdministrators(config.group_id);
-}
-
 lc.on('stop', stop);
 async function stop() {
     if (limits) await limits.disconnect();
@@ -71,6 +66,7 @@ async function handle_meme_request(ctx) {
                 log.info(`User who is not in the group tried to post a meme: '${username}'`);
                 return;
             }
+            log.info(`Group memebership check OK for user '${username}'`, member);
         }
         catch (error) {
             log.warn(`User who is not in the group tried to post a meme (error during check): '${username}'`);
