@@ -66,7 +66,7 @@ async function handle_meme_request(ctx) {
                 return;
             }
             if (!["creator", "member", "administrator"].includes(member.status)) {
-                log.info(`Restricted user tried to pos a meme: '${username}'`, member.status);
+                log.info(`Restricted user tried to pos a meme: '${username}'`, member);
                 return;
             }
         }
