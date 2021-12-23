@@ -60,3 +60,5 @@ rrb.json
 # error logs
 critical_error*
 
+# mha stuff
+nominees

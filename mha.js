@@ -5,14 +5,25 @@ const MongoClient = require('mongodb').MongoClient;
 const uuidv4 = require('uuid').v4;
 const fs = require('fs');
 const https = require('https');
+const http = require('http');
+const path = require('path');
+const basename = path.basename;
 const CsvReadableStream = require('csv-reader');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const url = require('url');
+const URL = url.URL;
+const fetch = require('node-fetch');
+
+
 
 if (process.argv[2] === 'users') {
     export_users();
 }
 if (process.argv[2] === 'nominees') {
-    export_nominees();
+    export_top(500, "like", new Date("2020-12-17"), new Date("2021-12-16"));
+}
+if (process.argv[2] === 'weeb') {
+    export_top(20, "weeb", new Date("2020-12-17"), new Date("2021-12-16"));
 }
 if (process.argv[2] === 'media') {
     export_media();
@@ -40,7 +51,13 @@ async function export_nominees() {
     for (category of mha_config.nominees.categories) {
         console.log(`Getting memes of category ${category}...`);
         const votes_field = category == "Weeb" ? "$votes.weeb" : "$votes.like";
-        const match = { categories: category };
+        const match = {
+            categories: category,
+            post_date: {
+                $gt: "2020-12-17",
+                $lt: "2021-12-16"
+            }
+        };
         match[`votes.${category == 'Weeb' ? 'weeb' : 'like'}`] = { $exists: true };
         const result = await collection.aggregate([
             { $match: match },
@@ -69,6 +86,78 @@ async function export_nominees() {
     const json = JSON.stringify(nominees, null, '  ');
     for (const file of mha_config.nominees.nominees_paths) {
         await fs.promises.writeFile(file, json);
+    }
+    console.log('Done!');
+}
+
+/**
+ * Queries the best memes posted during a given timeframe and downloads them.
+ * The names of the files will include the amount of votes, the categories and 
+ * the meme id. 
+ * @param {*} amount The amount of memes to download.
+ * @param {*} votes_field The vote filed used to determine best memes.
+ * @param {*} date_start The start of the timeframe in which the memes have been posted.
+ * @param {*} date_end The end of the timeframe in which the memes have been posted.
+ */
+async function export_top(amount, votes_field, date_start, date_end) {
+    console.log(`Exporting nominees (${amount} best, using the vote file ${votes_field})...`);
+    console.log('Connecting to mongodb...');
+    const client = new MongoClient(config.mongodb.connection_string, { useNewUrlParser: true, useUnifiedTopology: true });
+    await client.connect();
+    const db = client.db(config.mongodb.database);
+    console.log('Connectet!');
+
+    const collection = db.collection(config.mongodb.collection_names.memes);
+    const match = {
+        post_date: {
+            $gte: date_start,
+            $lt: date_end
+        }
+    };
+    match[`votes.${votes_field}`] = { $exists: true };
+    const result = await collection.aggregate([
+        { $match: match },
+        {
+            $project: {
+                id: '$_id',
+                user_id: '$poster_id',
+                votes: { $size: `$votes.${votes_field}` },
+                categories: true,
+                _id: false
+            }
+        },
+        { $sort: { votes: -1 } },
+        { $limit: amount },
+        {
+            $lookup: {
+                from: config.mongodb.collection_names.users,
+                localField: "user_id",
+                foreignField: "_id",
+                as: "users"
+            }
+        },
+        {
+            $replaceRoot: {
+                newRoot: { $mergeObjects: [{ $arrayElemAt: ["$users", 0] }, "$$ROOT"] }
+            }
+        }
+    ]);
+
+    const memes = await result.toArray();
+
+    if (memes.length !== amount) {
+        console.log(`WARNING: Not enough memes found: ${memes.length} / ${amount}`);
+    }
+
+    for (const meme of memes) {
+        console.log(meme);
+        // Get metadata for file
+        const meta_result = await fetch(`https://media.memehub.leifb.dev/${meme.id}/meta`);
+        const meta = await meta_result.json();
+
+        // Download file itself
+        const file_name = `${meme.votes}_${meme.username}_${meme.categories.join("-")}_[${meme.id}]`;
+        await download(`https://media.memehub.leifb.dev/${meme.id}/file`, `./nominees/${file_name}.${meta.ext}`);
     }
     console.log('Done!');
 }
@@ -290,3 +379,38 @@ async function getMemeStats(memes, id) {
     return await result.next();
 }
 
+const TIMEOUT = 10000;
+function download(url, dest) {
+    const uri = new URL(url)
+    if (!dest) {
+        dest = basename(uri.pathname)
+    }
+    const pkg = url.toLowerCase().startsWith('https:') ? https : http
+
+    return new Promise((resolve, reject) => {
+        const request = pkg.get(uri.href).on('response', (res) => {
+            if (res.statusCode === 200) {
+                const file = fs.createWriteStream(dest, { flags: 'wx' })
+                res
+                    .on('end', () => {
+                        file.end()
+                        // console.log(`${uri.pathname} downloaded to: ${path}`)
+                        resolve()
+                    })
+                    .on('error', (err) => {
+                        file.destroy()
+                        fs.unlink(dest, () => reject(err))
+                    }).pipe(file)
+            } else if (res.statusCode === 302 || res.statusCode === 301) {
+                // Recursively follow redirects, only a 200 will resolve.
+                download(res.headers.location, dest).then(() => resolve())
+            } else {
+                reject(new Error(`Download request failed, response status: ${res.statusCode} ${res.statusMessage}`))
+            }
+        })
+        request.setTimeout(TIMEOUT, function () {
+            request.abort()
+            reject(new Error(`Request timeout after ${TIMEOUT / 1000.0}s`))
+        })
+    })
+}
