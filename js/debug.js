@@ -55,22 +55,27 @@ async function log_all_updates(ctx, next) {
 }
 
 async function show_voting_token(ctx) {
-    if (!config.command_voting_token) return;
-    if (ctx.chat.type !== "private") return;
+    try {
+        if (!config.command_voting_token) return;
+        if (ctx.chat.type !== "private") return;
 
-    const mha_users = await get_mha_users();
-    const user = ctx.update.message.from.id;
-    const tokens = Object.keys(mha_users).filter(k => mha_users[k].id == user);
-    if (tokens.length < 1) {
-        ctx.reply("You are not allowed to vote 🙃");
-        return;
+        const mha_users = await get_mha_users();
+        const user = ctx.update.message.from.id;
+        const tokens = Object.keys(mha_users).filter(k => mha_users[k].id == user);
+        if (tokens.length < 1) {
+            await ctx.reply("You are not allowed to vote 🙃");
+            return;
+        }
+
+        if (tokens.length > 1) {
+            await log.warning("Found multiple token for user to vote with", { context: ctx });
+        }
+
+        await ctx.reply(`You can cast your vote here:\n${mha.url}${tokens[0]}`);
     }
-
-    if (tokens.length > 1) {
-        await log.warning("Found multiple token for user to vote with", { context: ctx });
+    catch (error) {
+        await log.warn("Error during show_voting_token command.", error);
     }
-
-    ctx.reply(`You can cast your vote here:\n${mha.url}${tokens[0]}`);
 }
 
 async function broadcast_voting_token(ctx) {
@@ -79,16 +84,27 @@ async function broadcast_voting_token(ctx) {
         ctx.reply("You are not allowed to use this command.");
         return;
     }
-    const users = await get_mha_users();
-    for (token in users) {
-        try {
-            const id = users[token].id;
-            await ctx.telegram.sendMessage(id, `It's time for Memehub Awards 2020! Vote here:\n${mha.url}${token}`);
+
+    try {
+        const users = await get_mha_users();
+        await log.notice(`Broadcasting MHA invite links to ${Object.keys(users).length} users.`);
+        for (token in users) {
+            try {
+                const id = users[token].id;
+                await ctx.telegram.sendMessage(id, `It's time for the Memehub Awards 2021! Vote here:\n${mha.url}${token}`);
+            }
+            catch (err) {
+                await log.warn("Failed to send MHA invite link.", {
+                    token,
+                    user: users[token],
+                    problem: err.message
+                });
+            }
         }
-        catch (err) {
-            console.log('Cannot broadcast message.');
-            console.log(err);
-        }
+        log.notice("Finished broadcasting MHA invite links.");
+    }
+    catch (error) {
+        log.warn("Error while broadcasting MHA invite links.", error);
     }
 }
 
