@@ -14,7 +14,7 @@ const url = require('url');
 const URL = url.URL;
 const fetch = require('node-fetch');
 
-
+// NOTICE: THIS FILE IS OLD AND NOT USED ANYMORE. USE THE MemeHub-Awards REPOSITORY INSTEAD!
 
 if (process.argv[2] === 'users') {
     export_users();
